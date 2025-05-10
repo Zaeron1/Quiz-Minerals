@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Photo → Nom&nbsp;+&nbsp>Système</title>
+  <style>
+    :root{
+      --primary:#4a90e2;
+      --primary-dark:#357ab8;
+      --success:#2ecc71;
+      --error:#e74c3c;
+    }
+    html,body{
+      margin:0;height:100%;
+      display:flex;align-items:center;justify-content:center;
+      background:linear-gradient(135deg,#f5f7fa 0%,#c3cfe2 100%);
+      font-family:'Segoe UI',Roboto,Arial,sans-serif;
+    }
+    .card{
+      background:#fff;
+      padding:2rem 2.5rem;
+      border-radius:12px;
+      box-shadow:0 8px 24px rgba(0,0,0,.1);
+      width:min(500px,92%);
+      text-align:center;
+    }
+    h2{margin-top:0}
+    img{
+      max-width:240px;
+      max-height:200px;
+      border-radius:8px;
+      border:1px solid #ccc;
+      object-fit:contain;
+    }
+    input,select{
+      font-size:1rem;
+      padding:.4rem .6rem;
+      border:1px solid #bbb;
+      border-radius:6px;
+      margin:.45rem;
+      max-width:220px;
+    }
+    button.btn{
+      background:var(--primary);
+      color:#fff;
+      border:none;
+      border-radius:8px;
+      padding:.6rem 1.4rem;
+      font-size:1rem;
+      margin:.45rem;
+      cursor:pointer;
+      transition:background .2s;
+    }
+    button.btn:hover{background:var(--primary-dark);}
+    #message{font-size:1.35rem;margin-top:1rem;height:1.6rem;}
+    .vrai{color:var(--success);}
+    .faux{color:var(--error);}
+    .fade{animation:fadeOut .8s forwards;}
+    @keyframes fadeOut{from{opacity:1;}to{opacity:0;}}
+    .hint{font-size:.9rem;color:var(--error);margin-left:.4rem;}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Quel est ce minéral&nbsp;?</h2>
+
+    <img id="mineralImg" src="" alt="Photo du minéral"><br><br>
+
+    <input type="text" id="name" placeholder="Entrez le nom">
+    <span id="nameHint" class="hint"></span><br>
+
+    <select id="system"></select>
+    <span id="systemHint" class="hint"></span><br>
+
+    <button class="btn" onclick="checkAnswer()">Valider</button>
+    <button class="btn" onclick="skip()">Passer</button>
+    <button class="btn" onclick="showAnswer()">Réponse</button>
+
+    <div id="message"></div>
+  </div>
+
+<script>
+/* ---------- utilitaires ---------- */
+const systems = ["triclinique","monoclinique","orthorhombique",
+                 "tétragonal","trigonal","hexagonal","cubique"];
+const equalNoCase = (a,b)=>a.trim().toUpperCase()===b.trim().toUpperCase();
+
+/* retire accents + espaces pour fabriquer le nom de fichier */
+function filenameFromName(n){
+  return n
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"") // accents
+    .replace(/\s+/g,"")                              // espaces
+    .toLowerCase()+".png";
+}
+
+function shuffle(arr){
+  const a=arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+/* ---------- données ---------- */
+const minerals=[
+  {name:"Malachite", formula:"Cu3(CO3)2(OH)2", system:"monoclinique"},
+  {name:"Quartz",    formula:"SiO2",           system:"trigonal"},
+  {name:"Hématite",  formula:"Fe2O3",          system:"trigonal"},
+  {name:"Galène",    formula:"PbS",            system:"cubique"},
+  {name:"Calcite",   formula:"CaCO3",          system:"trigonal"}
+];
+
+/* ---------- variables DOM ---------- */
+let imgEl,nameInput,nameHint,systemHint,systemSel,messageDiv;
+let order=[],idx=-1,current=null;
+
+/* ---------- fonctions ---------- */
+function prepareSelect(){
+  systemSel=document.getElementById("system");
+  systems.forEach(s=>{
+    const opt=document.createElement("option");
+    opt.value=opt.textContent=s;
+    systemSel.appendChild(opt);
+  });
+}
+
+function resetHints(){nameHint.textContent="";systemHint.textContent="";}
+
+function loadImage(min){
+  const path="images/"+filenameFromName(min.name);
+  imgEl.src=path;
+  imgEl.onerror=()=>{imgEl.onerror=null; imgEl.src="images/no.png";}
+}
+
+function nextQuestion(){
+  if(++idx>=order.length){order=shuffle(minerals);idx=0;}
+  current=order[idx];
+  loadImage(current);
+
+  nameInput.value="";
+  systemSel.selectedIndex=0;
+  resetHints();
+  messageDiv.textContent="";
+  messageDiv.className="";
+}
+
+function showMessage(t,c){
+  messageDiv.classList.remove("fade");
+  void messageDiv.offsetWidth;
+  messageDiv.textContent=t;
+  messageDiv.className=c;
+  if(c==="faux") messageDiv.classList.add("fade");
+}
+
+function checkAnswer(){
+  resetHints();
+  let ok=true;
+
+  if(!equalNoCase(nameInput.value,current.name)){
+    ok=false;nameHint.textContent="Faux";nameInput.value="";
+  }
+  if(!equalNoCase(systemSel.value,current.system)){
+    ok=false;systemHint.textContent="Faux";
+  }
+
+  if(ok){
+    showMessage("Vrai !","vrai");
+    setTimeout(nextQuestion,800);
+  }else{
+    showMessage("Faux !","faux");
+  }
+}
+const skip = ()=>nextQuestion();
+function showAnswer(){
+  nameInput.value=current.name;
+  systemSel.value=current.system;
+}
+
+/* ---------- init ---------- */
+document.addEventListener("DOMContentLoaded",()=>{
+  imgEl=document.getElementById("mineralImg");
+  nameInput=document.getElementById("name");
+  nameHint=document.getElementById("nameHint");
+  systemHint=document.getElementById("systemHint");
+  messageDiv=document.getElementById("message");
+  prepareSelect();
+  nextQuestion();
+});
+</script>
+</body>
+</html>

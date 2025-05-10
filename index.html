@@ -1,4 +1,4 @@
-<!-- index.html – trois modes avec badge “en travaux” -->
+<!-- index.html – trois modes, intro + note sur la disponibilité -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -20,14 +20,21 @@
       padding:2.5rem 3rem;
       border-radius:12px;
       box-shadow:0 8px 24px rgba(0,0,0,.1);
-      width:min(420px,90%);
+      width:min(460px,92%);
       text-align:center;
     }
-    h1{margin:0 0 1.6rem;}
+    h1{margin:0 0 1rem;}
+
+    p.intro{
+      margin:0 0 1.4rem;
+      font-size:.95rem;
+      line-height:1.4;
+      color:#333;
+    }
 
     /* boutons */
     a.button{
-      position:relative;                 /* nécessaire pour le badge */
+      position:relative;                 /* pour le badge éventuel */
       display:inline-block;
       margin:.65rem;
       padding:.9rem 1.7rem;
@@ -39,15 +46,15 @@
     }
     a.button:hover{background:var(--primary-dark);}
 
-    /* badge “travaux” pour le bouton du mode 3 */
+    /* badge “travaux” */
     a.button.wip::after{
       content:"";
       position:absolute;
-      top:-12px;                         /* léger débordement */
+      top:-12px;
       right:-25px;
       width:72px;height:72px;
       background:url("images/travaux.png") center/contain no-repeat;
-      pointer-events:none;               /* clics passent au bouton */
+      pointer-events:none;
     }
 
     footer{margin-top:2rem;font-size:.9rem;color:#555;}
@@ -57,9 +64,16 @@
   <div class="card">
     <h1>Révisions&nbsp;des&nbsp;Minéraux</h1>
 
+    <p class="intro">
+      Bienvenue&nbsp;! Ce site permet de réviser <strong>noms, formules chimiques
+      et systèmes cristallins</strong> des minéraux abordés en cours. Les classes
+      minéralogiques ne sont <em>pas encore</em> incluses.<br>
+      Le mode « Photo → Nom&nbsp;+&nbsp;Système » est en cours de développement ;&nbsp;
+      merci de votre patience !
+    </p>
+
     <a class="button" href="mode1.html">Nom → Formule</a>
     <a class="button" href="mode2.html">Formule → Nom</a>
-    <!-- bouton en travaux -->
     <a class="button wip" href="mode3.html">Photo → Nom + Système</a>
 
     <footer>© 2025</footer>

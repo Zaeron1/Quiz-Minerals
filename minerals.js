@@ -6,7 +6,7 @@ const minerals = [
   { name: ["Diamant"], formula: "C", system: ["cubique"] },
   { name: ["Graphite"], formula: "C", system: ["hexagonal"] },
   { name: ["Stannite"], formula: "Cu2FeSnS4", system: ["tétragonal"] },
-  { name: ["Wurtzite"], formula: "", system: ["hexagonal"] },
+  { name: ["Wurtzite"], formula: "(Zn,Fe)S", system: ["hexagonal"] },
   { name: ["Pentlandite"], formula: "(Fe,Ni)9S8", system: ["cubique"] },
   { name: ["Löllingite"], formula: "FeAs2", system: ["orthorhombique"] },
   { name: ["Skutterudite"], formula: "(Co,Ni)As3−x", system: ["cubique"] },

@@ -10,6 +10,7 @@
       --success: #2ecc71;
       --error: #e74c3c;
     }
+
     html, body {
       margin: 0;
       min-height: 100vh;
@@ -18,77 +19,116 @@
       justify-content: center;
       background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
       font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+      overflow-x: hidden;
+      animation: fadeInBody 0.8s ease-out both;
     }
+
     .card {
       background: #fff;
       padding: 2rem 2.5rem;
-      border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, .1);
+      border-radius: 16px;
+      box-shadow: 0 16px 32px rgba(0, 0, 0, .12);
       width: min(500px, 92%);
       text-align: center;
+      animation: slideUp 0.7s ease-out;
     }
-    h2 { margin: 0 0 1rem; }
-    .prompt { font-size: 1.8rem; margin-bottom: 1rem; }
+
+    h2 { margin: 0 0 1.2rem; font-size: 1.75rem; color: #333; }
+    .prompt {
+      font-size: 1.8rem;
+      margin-bottom: 1.3rem;
+      color: #222;
+      animation: pulseText 1.5s ease-in-out infinite alternate;
+    }
+    @keyframes pulseText {
+      from { transform: scale(1); opacity: 0.85; }
+      to { transform: scale(1.03); opacity: 1; }
+    }
+
     input, select {
       font-size: 1rem;
-      padding: .45rem .6rem;
+      padding: 0.5rem 0.7rem;
       border: 1px solid #bbb;
-      border-radius: 6px;
-      margin: .4rem;
-      max-width: 230px;
+      border-radius: 8px;
+      margin: 0.4rem;
+      max-width: 240px;
+      width: 100%;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
+    input:focus, select:focus {
+      border-color: var(--primary);
+      outline: none;
+      box-shadow: 0 0 6px rgba(74, 144, 226, 0.3);
+    }
+
     button.btn {
       background: var(--primary);
       color: #fff;
       border: none;
       border-radius: 8px;
-      padding: .6rem 1.4rem;
-      font-size: 1rem;
-      margin: .4rem;
+      padding: 0.65rem 1.6rem;
+      font-size: 1.05rem;
+      margin: 0.4rem;
       cursor: pointer;
-      transition: background .2s;
+      transition: background 0.25s, transform 0.2s;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
-    button.btn:hover { background: var(--primary-dark); }
-    #message { font-size: 1.35rem; margin-top: 1rem; height: 1.6rem; }
-    .vrai { color: var(--success); }
-    .faux { color: var(--error); }
-    .hint { font-size: .9rem; margin-left: .5rem; }
+    button.btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    #message {
+      font-size: 1.35rem;
+      margin-top: 1rem;
+      height: 1.6rem;
+      transition: opacity 0.2s;
+    }
+    .vrai { color: var(--success); animation: bounceIn 0.4s ease-out; }
+    .faux { color: var(--error); animation: shake 0.4s ease-in-out; }
+
+    .hint { font-size: 0.9rem; margin-left: 0.5rem; color: #666; }
+    .nav-arrows {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+    .arrow-btn {
+      font-size: 1.5rem;
+      background: #eee;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .arrow-btn:hover { background: #ddd; }
   </style>
 </head>
 <body>
   <div class="card">
     <h2>Nom → Formule</h2>
-
     <div id="question" class="prompt"></div>
-
     <input type="text" id="formula" placeholder="Entrez la formule">
     <span id="formulaHint" class="hint"></span><br>
-
     <select id="system"></select>
     <span id="systemHint" class="hint"></span><br>
-
     <button class="btn" onclick="checkAnswer()">Valider</button>
-    <button class="btn" onclick="skip()">Passer</button>
     <button class="btn" onclick="showAnswer()">Réponse</button>
-
+    <div class="nav-arrows">
+      <button class="arrow-btn" onclick="previousQuestion()">⟵</button>
+      <button class="arrow-btn" onclick="nextQuestion()">⟶</button>
+    </div>
     <div id="message"></div>
   </div>
 
   <script src="minerals.js"></script>
-
   <script>
-    const systems = ["triclinique", "monoclinique", "orthorhombique",
-                     "tétragonal", "trigonal", "hexagonal", "cubique"];
-
-    const sanitizeFormula = f =>
-      f.replace(/\s|_/g, '')
-       .replace(/[\[\{]/g, '(')
-       .replace(/[\]\}]/g, ')')
-       .replace(/[₀-₉]/g, d => '0123456789'['₀₁₂₃₄₅₆₇₈₉'.indexOf(d)])
-       .toUpperCase();
-
+    const systems = ["triclinique", "monoclinique", "orthorhombique", "tétragonal", "trigonal", "hexagonal", "cubique"];
+    const sanitizeFormula = f => f.replace(/\s|_/g, '').replace(/[\[\{]/g, '(').replace(/[\]\}]/g, ')')
+      .replace(/[₀-₉]/g, d => '0123456789'['₀₁₂₃₄₅₆₇₈₉'.indexOf(d)]).toUpperCase();
     const equalNoCase = (a, b) => a.trim().toUpperCase() === b.trim().toUpperCase();
-
     const shuffle = a => {
       const arr = a.slice();
       for (let i = arr.length - 1; i > 0; i--) {
@@ -115,7 +155,6 @@
         systemSel.appendChild(opt);
       });
 
-      // Entrée pour valider
       document.addEventListener("keydown", e => {
         if (e.key === "Enter" && (e.target === formulaInput || e.target === systemSel)) {
           e.preventDefault();
@@ -123,6 +162,7 @@
         }
       });
 
+      order = shuffle(minerals);
       nextQuestion();
     });
 
@@ -139,8 +179,7 @@
       return Array.isArray(min.system) ? min.system : [min.system];
     }
 
-    function nextQuestion() {
-      if (++idx >= order.length) { order = shuffle(minerals); idx = 0; }
+    function loadQuestion() {
       current = order[idx];
       questionDiv.textContent = current.name;
       formulaInput.value = "";
@@ -148,12 +187,20 @@
       resetHints();
     }
 
+    function nextQuestion() {
+      if (++idx >= order.length) { order = shuffle(minerals); idx = 0; }
+      loadQuestion();
+    }
+
+    function previousQuestion() {
+      if (--idx < 0) idx = order.length - 1;
+      loadQuestion();
+    }
+
     function checkAnswer() {
       resetHints();
       let formulaOK = false;
       let systemOK = false;
-
-      // Vérif formule
       if (equalNoCase(sanitizeFormula(formulaInput.value), sanitizeFormula(current.formula))) {
         formulaHint.textContent = "Vrai";
         formulaHint.classList.add("vrai");
@@ -163,8 +210,6 @@
         formulaHint.classList.add("faux");
         formulaInput.value = "";
       }
-
-      // Vérif système
       if (validSystems(current).some(s => equalNoCase(systemSel.value, s))) {
         systemHint.textContent = "Vrai";
         systemHint.classList.add("vrai");
@@ -173,8 +218,6 @@
         systemHint.textContent = "Faux";
         systemHint.classList.add("faux");
       }
-
-      // Résultat global
       if (formulaOK && systemOK) {
         messageDiv.textContent = "Vrai !";
         messageDiv.className = "vrai";
@@ -184,8 +227,6 @@
         messageDiv.className = "faux";
       }
     }
-
-    const skip = () => nextQuestion();
 
     function showAnswer() {
       formulaInput.value = current.formula;

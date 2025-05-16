@@ -115,13 +115,5 @@
     <footer>© 16 mai 2025</footer>
     <div class="counter" id="visitCounter"></div>
   </div>
-
-  <script>
-    // Stocke et affiche le nombre de visites locales
-    const visitCount = localStorage.getItem('visitCount') || 0;
-    const newCount = Number(visitCount) + 1;
-    localStorage.setItem('visitCount', newCount);
-    document.getElementById('visitCounter').textContent = `${newCount}`;
-  </script>
 </body>
 </html>

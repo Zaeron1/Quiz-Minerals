@@ -1,61 +1,58 @@
-<!-- mode1.html – Nom → Formule (systèmes multiples pris en charge) -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
   <title>Nom → Formule</title>
   <style>
-    :root{
-      --primary:#4a90e2;
-      --primary-dark:#357ab8;
-      --success:#2ecc71;
-      --error:#e74c3c;
+    :root {
+      --primary: #4a90e2;
+      --primary-dark: #357ab8;
+      --success: #2ecc71;
+      --error: #e74c3c;
     }
-    html,body{
-      margin:0;
-      min-height:100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:linear-gradient(135deg,#f5f7fa 0%,#c3cfe2 100%);
-      font-family:'Segoe UI',Roboto,Arial,sans-serif;
+    html, body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
     }
-    .card{
-      background:#fff;
-      padding:2rem 2.5rem;
-      border-radius:12px;
-      box-shadow:0 8px 24px rgba(0,0,0,.1);
-      width:min(500px,92%);
-      text-align:center;
+    .card {
+      background: #fff;
+      padding: 2rem 2.5rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .1);
+      width: min(500px, 92%);
+      text-align: center;
     }
-    h2{margin:0 0 1rem;}
-    .prompt{font-size:1.8rem;margin-bottom:1rem;}
-    input,select{
-      font-size:1rem;
-      padding:.45rem .6rem;
-      border:1px solid #bbb;
-      border-radius:6px;
-      margin:.4rem;
-      max-width:230px;
+    h2 { margin: 0 0 1rem; }
+    .prompt { font-size: 1.8rem; margin-bottom: 1rem; }
+    input, select {
+      font-size: 1rem;
+      padding: .45rem .6rem;
+      border: 1px solid #bbb;
+      border-radius: 6px;
+      margin: .4rem;
+      max-width: 230px;
     }
-    button.btn{
-      background:var(--primary);
-      color:#fff;
-      border:none;
-      border-radius:8px;
-      padding:.6rem 1.4rem;
-      font-size:1rem;
-      margin:.4rem;
-      cursor:pointer;
-      transition:background .2s;
+    button.btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: .6rem 1.4rem;
+      font-size: 1rem;
+      margin: .4rem;
+      cursor: pointer;
+      transition: background .2s;
     }
-    button.btn:hover{background:var(--primary-dark);}
-    #message{font-size:1.35rem;margin-top:1rem;height:1.6rem;}
-    .vrai{color:var(--success);}
-    .faux{color:var(--error);}
-    .fade{animation:fadeOut .8s forwards;}
-    @keyframes fadeOut{from{opacity:1;}to{opacity:0;}}
-    .hint{font-size:.9rem;color:var(--error);margin-left:.5rem;}
+    button.btn:hover { background: var(--primary-dark); }
+    #message { font-size: 1.35rem; margin-top: 1rem; height: 1.6rem; }
+    .vrai { color: var(--success); }
+    .faux { color: var(--error); }
+    .hint { font-size: .9rem; margin-left: .5rem; }
   </style>
 </head>
 <body>
@@ -77,167 +74,123 @@
     <div id="message"></div>
   </div>
 
-<script>
-/* ---------- utilitaires ---------- */
-const systems = ["triclinique","monoclinique","orthorhombique",
-                 "tétragonal","trigonal","hexagonal","cubique"];
+  <script src="minerals.js"></script>
 
-const sanitizeFormula = f => f.replace(/\s|_/g,'').toUpperCase();
-const equalNoCase = (a,b)=>a.trim().toUpperCase()===b.trim().toUpperCase();
-const shuffle = a=>{
-  const arr=a.slice();
-  for(let i=arr.length-1;i>0;i--){
-    const j=Math.floor(Math.random()*(i+1));
-    [arr[i],arr[j]]=[arr[j],arr[i]];
-  }
-  return arr;
-};
+  <script>
+    const systems = ["triclinique", "monoclinique", "orthorhombique",
+                     "tétragonal", "trigonal", "hexagonal", "cubique"];
 
-/* -------- données -------- */
-const minerals = [
-  {name:"Argent natif",   formula:"Ag",                system:"cubique"},
-  {name:"Or natif",       formula:"Au",                system:"cubique"},
-  {name:"Fer natif",      formula:"Fe",                system:"cubique"},
-  {name:"Diamant",        formula:"C",                 system:"cubique"},
-  {name:"Stannite",       formula:"Cu2FeSnS4",         system:"tétragonal"},
-  {name:"Wurtzite",       formula:"",                  system:"hexagonal"},
-  {name:"Pentlandite",    formula:"(Fe,Ni)9S8",        system:"cubique"},
-  {name:"Löllingite",     formula:"FeAs2",             system:"orthorhombique"},
-  {name:"Skutterudite",   formula:"(Co,Ni)As3−x",      system:"cubique"},
-  {name:"Pyrargyrite",    formula:"Ag3SbS3",           system:"trigonal"},
-  {name:"Proustite",      formula:"Ag3AsS3",           system:"trigonal"},
-  {name:"Enargite",       formula:"Cu3AsS4",           system:"orthorhombique"},
-  {name:"Anatase",        formula:"TiO2",              system:"tétragonal"},
-  {name:"Brookite",       formula:"TiO2",              system:"orthorhombique"},
-  {name:"Spinelle",       formula:"MgAl2O4",           system:"cubique"},
-  {name:"Chrysoberyl",    formula:"Be(AlO2)2",         system:"orthorhombique"},
-  {name:"Perovskite",     formula:"CaTiO3",            system:"orthorhombique"},
-  {name:"Brucite",        formula:"Mg(OH)2",           system:"trigonal"},
-  {name:"Manganite",      formula:"MnO(OH)",           system:"monoclinique"},
-  {name:"Gibbsite",       formula:"Al(OH)3",           system:"monoclinique"},
-  {name:"Sylvite",        formula:"KCl",               system:"cubique"},
-  {name:"Atacamite",      formula:"CuCl2(OH)3",        system:"orthorhombique"},
-  {name:"Magnesite",      formula:"MgCO3",             system:"trigonal"},
-  {name:"Nitronatrite",   formula:"NaNO3",             system:"trigonal"},
-  {name:"Nitre",          formula:"KNO3",              system:"orthorhombique"},
-  {name:"Crocoïte",       formula:"PbCrO4",            system:"monoclinique"},
-  {name:"Scheelite",      formula:"CaWO4",             system:"tétragonal"},
-  {name:"Wulfénite",      formula:"PbMoO4",            system:"tétragonal"},
-  {name:"Wulfénite",      formula:"PbMoO4",            system:"tétragonal"},  // doublon conservé
-  {name:"Xénotime",       formula:"YPO4",              system:"tétragonal"},
-  {name:"Monazite",       formula:"(Ce,La,Ne,Th)PO4",  system:"monoclinique"},
-  {name:"Mimétite",       formula:"Pb5(AsO4)3Cl",      system:"hexagonal"},
-  {name:"Vanadinite",     formula:"Pb5(VO4)3Cl",       system:"hexagonal"},
-  {name:"Pyrope",         formula:"Mg3Al2[SiO4]3",     system:"cubique"},
-  {name:"Almandin",       formula:"Fe2+3Al2[SiO4]3",   system:"cubique"},
-  {name:"Spessartine",    formula:"Mn3Al2[SiO4]3",     system:"cubique"},
-  {name:"Grossulaire",    formula:"Ca3Al2[SiO4]3",     system:"cubique"},
-  {name:"Andradite",      formula:"Ca3Fe2[SiO4]3",     system:"cubique"},
-  {name:"Uvarovite",      formula:"Ca3Cr2[SiO4]3",     system:"cubique"},
-  {name:"Titanite",       formula:"CaTiSiO5",          system:"monoclinique"},
-  {name:"Ottrelite",      formula:"(Mn2+,Fe2+,Mg)Al2[SiO4]O(OH)2", system:"monoclinique"},
-  {name:"Hémimorphite",   formula:"Zn4Si2O7(OH)2·(H2O)",           system:"orthorhombique"},
-  {name:"Diopside",       formula:"CaMg[Si2O6]",                   system:"monoclinique"},
-  {name:"Enstatite",      formula:"Mg2[Si2O6]",                    system:"orthorhombique"},
-  {name:"Trémolite",      formula:"Ca2Mg5[Si4O11(OH,F)]2",         system:"monoclinique"},
-  {name:"Wollastonite",   formula:"CaSiO3",                        system:"triclinique"},
-  {name:"Phlogopite",     formula:"KMg3[Si3AlO10](OH)2",           system:"monoclinique"},
-  {name:"Tridymite",      formula:"SiO2",                          system:"triclinique"},
-  {name:"Cristobalite",   formula:"SiO2",                          system:"tétragonal"},
-  {name:"Nepheline",      formula:"Na3K[Al4Si4O16]",              system:"hexagonal"},
+    const sanitizeFormula = f =>
+      f.replace(/\s|_/g, '')
+       .replace(/[\[\{]/g, '(')
+       .replace(/[\]\}]/g, ')')
+       .replace(/[₀-₉]/g, d => '0123456789'['₀₁₂₃₄₅₆₇₈₉'.indexOf(d)])
+       .toUpperCase();
 
-  /* ---- MINÉRAUX À DEUX SYSTÈMES ---- */
-  {name:"Orthose",     formula:"K[AlSi3O8]",        system:["triclinique","orthorhombique"]},
-  {name:"Serpentine",  formula:"Mg6[Si4O10](OH)8",  system:["monoclinique","orthorhombique"]},
-  {name:"Pyrrhotite",  formula:"Fe1−xS",            system:["monoclinique","hexagonal"]},
-  {name:"Chloritoïde", formula:"FeAl2O[SiO4](OH)2", system:["monoclinique","tétragonal"]},
+    const equalNoCase = (a, b) => a.trim().toUpperCase() === b.trim().toUpperCase();
 
-  /* ---- suite de la liste inchangée ---- */
-  {name:"Anorthite",      formula:"Ca[Al2Si2O8]",     system:"triclinique"},
-  {name:"Albite",         formula:"Na[AlSi3O8]",      system:"triclinique"},
-  {name:"Cuivre natif",   formula:"Cu",               system:"cubique"},
-  {name:"Soufre natif",   formula:"S",                system:"orthorhombique"},
-  {name:"Graphite",       formula:"C",                system:"hexagonal"},
-  {name:"Chalcocite",     formula:"Cu2S",             system:"monoclinique"},
-  {name:"Bornite",        formula:"Cu5FeS4",          system:"orthorhombique"},
-  {name:"Galène",         formula:"PbS",              system:"cubique"},
-  {name:"Sphalérite",     formula:"(Zn,Fe)S",         system:"cubique"},
-  {name:"Chalcopyrite",   formula:"CuFeS2",           system:"tétragonal"},
-  /* … garde le reste comme dans ta liste d’origine … */
-  {name:"Sodalite",       formula:"Na8[Al6Si6O24]Cl2",system:"cubique"}
-];
+    const shuffle = a => {
+      const arr = a.slice();
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    };
 
-/* ---------- variables ---------- */
-let formulaInput,formulaHint,systemHint,messageDiv,questionDiv,systemSel;
-let order=[],idx=-1,current=null;
+    let formulaInput, formulaHint, systemHint, messageDiv, questionDiv, systemSel;
+    let order = [], idx = -1, current = null;
 
-/* ---------- initialisation ---------- */
-document.addEventListener("DOMContentLoaded",()=>{
-  formulaInput=document.getElementById("formula");
-  formulaHint=document.getElementById("formulaHint");
-  systemHint=document.getElementById("systemHint");
-  messageDiv=document.getElementById("message");
-  questionDiv=document.getElementById("question");
-  systemSel=document.getElementById("system");
-  systems.forEach(s=>{
-    const opt=document.createElement("option");
-    opt.value=opt.textContent=s;
-    systemSel.appendChild(opt);
-  });
-  nextQuestion();
-});
+    document.addEventListener("DOMContentLoaded", () => {
+      formulaInput = document.getElementById("formula");
+      formulaHint  = document.getElementById("formulaHint");
+      systemHint   = document.getElementById("systemHint");
+      messageDiv   = document.getElementById("message");
+      questionDiv  = document.getElementById("question");
+      systemSel    = document.getElementById("system");
 
-/* ---------- logique ---------- */
-function resetHints(){formulaHint.textContent="";systemHint.textContent="";}
+      systems.forEach(s => {
+        const opt = document.createElement("option");
+        opt.value = opt.textContent = s;
+        systemSel.appendChild(opt);
+      });
 
-function nextQuestion(){
-  if(++idx>=order.length){ order=shuffle(minerals); idx=0; }
-  current=order[idx];
-  questionDiv.textContent=current.name;
-  formulaInput.value="";
-  systemSel.selectedIndex=0;
-  resetHints();
-  messageDiv.textContent=""; messageDiv.className="";
-}
+      // Entrée pour valider
+      document.addEventListener("keydown", e => {
+        if (e.key === "Enter" && (e.target === formulaInput || e.target === systemSel)) {
+          e.preventDefault();
+          checkAnswer();
+        }
+      });
 
-function showMessage(t,c){
-  messageDiv.classList.remove("fade");
-  void messageDiv.offsetWidth;
-  messageDiv.textContent=t;
-  messageDiv.className=c;
-  if(c==="faux") messageDiv.classList.add("fade");
-}
+      nextQuestion();
+    });
 
-function validSystems(min){
-  return Array.isArray(min.system)? min.system : [min.system];
-}
+    function resetHints() {
+      formulaHint.textContent = "";
+      formulaHint.className = "hint";
+      systemHint.textContent = "";
+      systemHint.className = "hint";
+      messageDiv.textContent = "";
+      messageDiv.className = "";
+    }
 
-function checkAnswer(){
-  resetHints();
-  let ok=true;
+    function validSystems(min) {
+      return Array.isArray(min.system) ? min.system : [min.system];
+    }
 
-  if(!equalNoCase(sanitizeFormula(formulaInput.value),sanitizeFormula(current.formula))){
-    ok=false; formulaHint.textContent="Faux"; formulaInput.value="";
-  }
+    function nextQuestion() {
+      if (++idx >= order.length) { order = shuffle(minerals); idx = 0; }
+      current = order[idx];
+      questionDiv.textContent = current.name;
+      formulaInput.value = "";
+      systemSel.selectedIndex = 0;
+      resetHints();
+    }
 
-  if(!validSystems(current).some(s=>equalNoCase(systemSel.value,s))){
-    ok=false; systemHint.textContent="Faux";
-  }
+    function checkAnswer() {
+      resetHints();
+      let formulaOK = false;
+      let systemOK = false;
 
-  if(ok){
-    showMessage("Vrai !","vrai");
-    setTimeout(nextQuestion,800);
-  }else{
-    showMessage("Faux !","faux");
-  }
-}
+      // Vérif formule
+      if (equalNoCase(sanitizeFormula(formulaInput.value), sanitizeFormula(current.formula))) {
+        formulaHint.textContent = "Vrai";
+        formulaHint.classList.add("vrai");
+        formulaOK = true;
+      } else {
+        formulaHint.textContent = "Faux";
+        formulaHint.classList.add("faux");
+        formulaInput.value = "";
+      }
 
-const skip = ()=>nextQuestion();
+      // Vérif système
+      if (validSystems(current).some(s => equalNoCase(systemSel.value, s))) {
+        systemHint.textContent = "Vrai";
+        systemHint.classList.add("vrai");
+        systemOK = true;
+      } else {
+        systemHint.textContent = "Faux";
+        systemHint.classList.add("faux");
+      }
 
-function showAnswer(){
-  formulaInput.value=current.formula;
-  systemSel.value=validSystems(current)[0];
-}
-</script>
+      // Résultat global
+      if (formulaOK && systemOK) {
+        messageDiv.textContent = "Vrai !";
+        messageDiv.className = "vrai";
+        setTimeout(nextQuestion, 800);
+      } else {
+        messageDiv.textContent = "Corrigez les champs incorrects.";
+        messageDiv.className = "faux";
+      }
+    }
+
+    const skip = () => nextQuestion();
+
+    function showAnswer() {
+      formulaInput.value = current.formula;
+      systemSel.value = validSystems(current)[0];
+    }
+  </script>
 </body>
 </html>

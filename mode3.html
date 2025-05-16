@@ -13,81 +13,93 @@
 
     html, body {
       margin: 0;
+      padding: 2rem;
       min-height: 100vh;
+      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
     }
 
     .card {
       background: #fff;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      padding: 2rem 2.5rem;
+      border-radius: 16px;
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.12);
       width: min(480px, 90%);
       text-align: center;
     }
 
     h2 { margin-bottom: 1rem; font-size: 1.6rem; color: #333; }
-    .prompt {
-      margin-bottom: 1.2rem;
-      animation: fadeIn 0.6s ease-in-out;
-    }
 
     .prompt img {
-      max-width: 400px;
-      max-height: 300px;
-      border-radius: 6px;
+      max-width: 100%;
+      max-height: 280px;
+      border-radius: 8px;
       border: 1px solid #ccc;
+      opacity: 0;
+      transition: opacity 0.5s ease;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
-    }
-
-    input, select {
-      font-size: 1rem;
+    input {
+      width: 100%;
       padding: 0.5rem;
+      font-size: 1rem;
       border: 1px solid #bbb;
       border-radius: 6px;
-      margin-bottom: 0.6rem;
-      width: 100%;
+      margin-bottom: 0.7rem;
       box-sizing: border-box;
+    }
+
+    input:focus {
+      border-color: var(--primary);
+      outline: none;
+    }
+
+    button.btn, .arrow-btn {
+      border: none;
+      border-radius: 6px;
+      padding: 0.6rem 1.2rem;
+      margin: 0.3rem;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: 0.3s;
     }
 
     button.btn {
       background: var(--primary);
       color: #fff;
-      border: none;
-      border-radius: 6px;
-      padding: 0.6rem 1.2rem;
-      font-size: 1rem;
-      margin: 0.3rem;
-      cursor: pointer;
     }
 
     button.btn:hover {
       background: var(--primary-dark);
+      transform: translateY(-2px);
     }
 
     .arrow-btn {
+      background: #e0e0e0;
       font-size: 1.4rem;
       padding: 0.4rem 0.8rem;
-      border: none;
-      border-radius: 6px;
-      background: #e0e0e0;
-      cursor: pointer;
-      margin: 0.3rem;
     }
 
-    .arrow-btn:hover { background: #ccc; }
+    .arrow-btn:hover {
+      background: #ccc;
+    }
+
     .hint { font-size: 0.85rem; color: #666; }
     .vrai { color: var(--success); }
     .faux { color: var(--error); }
-    #message { margin-top: 1rem; font-size: 1.2rem; min-height: 1.5rem; }
+
+    #message {
+      margin-top: 1rem;
+      font-size: 1.2rem;
+      min-height: 1.5rem;
+    }
+
+    @media (max-width: 480px) {
+      .prompt img { max-height: 200px; }
+    }
   </style>
 </head>
 <body>
@@ -96,10 +108,12 @@
     <div id="question" class="prompt"></div>
     <input type="text" id="name" placeholder="Entrez le nom du minéral">
     <div><span id="nameHint" class="hint"></span></div>
+
     <div id="systemContainer" style="display:none;">
       <select id="system"></select>
       <div><span id="systemHint" class="hint"></span></div>
     </div>
+
     <button class="btn" onclick="checkAnswer()">Valider</button>
     <button class="btn" onclick="showAnswer()">Réponse</button>
     <div>
@@ -115,7 +129,7 @@
     const equalNoCase = (a, b) => a.trim().toUpperCase() === b.trim().toUpperCase();
     const includesNoCase = (input, list) => toArray(list).some(x => equalNoCase(input, x));
     const toArray = x => Array.isArray(x) ? x : [x];
-    const filenameFromName = raw => raw.normalize('NFD').replace(/[^\w\s]/g, '').replace(/\s+/g, '').toLowerCase() + '.png';
+    const filenameFromName = raw => raw.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^\w\s]/g, "").replace(/\s+/g, "").toLowerCase() + ".png";
 
     let nameInput, nameHint, systemHint, messageDiv, questionDiv, systemSel, systemContainer;
     let order = [], idx = -1, current = null;
@@ -161,12 +175,23 @@
       nameInput.value = "";
       systemSel.selectedIndex = 0;
       resetHints();
-      questionDiv.innerHTML = "";
-      const img = document.createElement("img");
-      img.alt = primaryName;
-      img.src = `images/${filenameFromName(primaryName)}`;
-      img.onerror = () => { img.onerror = null; img.src = "images/no.png"; };
-      questionDiv.appendChild(img);
+
+      const newImg = document.createElement("img");
+      newImg.alt = primaryName;
+      newImg.style.opacity = 0;
+      newImg.onload = () => newImg.style.opacity = 1;
+      newImg.src = `images/${filenameFromName(primaryName)}`;
+      newImg.onerror = () => { newImg.src = "images/no.png"; };
+
+      const oldImg = questionDiv.querySelector("img");
+      if (oldImg) {
+        oldImg.style.opacity = 0;
+        setTimeout(() => {
+          questionDiv.replaceChild(newImg, oldImg);
+        }, 300);
+      } else {
+        questionDiv.appendChild(newImg);
+      }
     }
 
     function nextQuestion() {
@@ -181,9 +206,10 @@
 
     function checkAnswer() {
       resetHints();
-      let nameOK = false;
       const expectedNames = toArray(current.name);
-      if (includesNoCase(nameInput.value, expectedNames)) {
+      const userInput = nameInput.value;
+
+      if (includesNoCase(userInput, expectedNames)) {
         nameHint.textContent = "Vrai";
         nameHint.classList.add("vrai");
         showMessage("Bonne réponse !", "vrai");
@@ -191,8 +217,8 @@
       } else {
         nameHint.textContent = "Faux";
         nameHint.classList.add("faux");
-        nameInput.value = "";
         showMessage("Nom incorrect.", "faux");
+        nameInput.value = "";
       }
     }
 

@@ -148,30 +148,34 @@
     }
 
     function nextQuestion() {
-      if (++idx >= order.length) { order = shuffle(minerals); idx = 0; }
-      current = order[idx];
+  // Nettoyer tout message précédent
+  messageDiv.textContent = "";
+  messageDiv.className = "";
 
-      const formula = toArray(current.formula)[0];
-      const systemList = toArray(current.system).join(", ");
-      questionDiv.innerHTML = formulaToHTML(formula);
-      nameInput.value = "";
-      systemSel.selectedIndex = 0;
-      resetHints();
+  if (++idx >= order.length) { order = shuffle(minerals); idx = 0; }
+  current = order[idx];
 
-      const matches = minerals.filter(m =>
-        toArray(m.formula).some(f => equalNoCase(f, formula))
-      );
+  const formula = toArray(current.formula)[0];
+  const systemList = toArray(current.system).join(", ");
+  questionDiv.innerHTML = formulaToHTML(formula);
+  nameInput.value = "";
+  systemSel.selectedIndex = 0;
+  resetHints();
 
-      if (matches.length > 1) {
-        showSystemSelector(false);
-        messageDiv.innerHTML =
-          `💡 Plusieurs minéraux partagent cette formule.<br>
-           Indice : système cristallin attendu → <strong>${systemList}</strong>`;
-        messageDiv.className = "info";
-      } else {
-        showSystemSelector(true);
-      }
-    }
+  const matches = minerals.filter(m =>
+    toArray(m.formula).some(f => equalNoCase(f, formula))
+  );
+
+  if (matches.length > 1) {
+    showSystemSelector(false);
+    messageDiv.innerHTML =
+      `💡 Plusieurs minéraux partagent cette formule.<br>
+       Indice : système cristallin attendu → <strong>${systemList}</strong>`;
+    messageDiv.className = "info";
+  } else {
+    showSystemSelector(true);
+  }
+}
 
     function showMessage(text, className) {
       if (messageDiv.className === "info") {
